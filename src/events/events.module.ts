@@ -2,18 +2,12 @@ import { Module } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { UsersModule } from 'src/users/users.module';
-import { APP_FILTER } from '@nestjs/core';
-import { ValidationExceptionFilter } from 'src/common/filters/exception.filter';
+
+import { JwtAuthGuard } from 'src/common/guards/auth.guard';
 
 @Module({
   imports: [UsersModule],
   controllers: [EventsController],
-  providers: [
-    EventsService,
-    {
-      provide: APP_FILTER,
-      useClass: ValidationExceptionFilter,
-    },
-  ],
+  providers: [EventsService, JwtAuthGuard],
 })
 export class EventsModule {}

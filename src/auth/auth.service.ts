@@ -1,5 +1,5 @@
 import { UsersService } from 'src/users/users.service';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -13,14 +13,20 @@ export class AuthService {
     const user = this.userService.findByEmail(email);
 
     if (!user) {
-      return false;
+      throw new HttpException(
+        'Invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // Compare the hashed password here
     const isPasswordValid = user.password === password ? true : false;
 
     if (!isPasswordValid) {
-      return false;
+      throw new HttpException(
+        'Invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     return user;

@@ -12,7 +12,6 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
-import { RequestValidationPipe } from 'src/common/pipes/validation.pipe';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UsersService } from 'src/users/users.service';
 import { GetEventsQueryParametersDto } from './dto/queryparametrs-event.dto';
@@ -25,35 +24,32 @@ export class EventsController {
     private readonly usersService: UsersService,
   ) {}
 
-  @Post('create')
-  create(@Body(new RequestValidationPipe()) createEventDto: CreateEventDto) {
+  @Post('')
+  create(@Body() createEventDto: CreateEventDto) {
     const user = this.usersService.findById(createEventDto.UserID);
     if (!user) return 'No user found';
     return this.eventsService.create(createEventDto);
   }
 
-  @Put('update/:id')
-  update(
-    @Param('id') id: string,
-    @Body(new RequestValidationPipe()) UpdateEventDto: any,
-  ) {
+  @Put(':id')
+  update(@Param('id') id: string, @Body() UpdateEventDto: any) {
     console.log(UpdateEventDto, id);
     return this.eventsService.update(UpdateEventDto, id);
   }
 
-  @Delete('delete/:id')
+  @Delete(':id')
   delete(@Param('id') id: string) {
     return this.eventsService.delete(id);
   }
 
-  @Get('all')
+  @Get('')
   findAll() {
     return this.eventsService.findAll();
   }
 
   @Get('day')
   @UseGuards(JwtAuthGuard)
-  @UsePipes(new RequestValidationPipe())
+  @UsePipes()
   findDailyEvents(
     @Query() queryParameters: GetEventsQueryParametersDto,
     @Request() req,
@@ -64,7 +60,7 @@ export class EventsController {
 
   @Get('week')
   @UseGuards(JwtAuthGuard)
-  @UsePipes(new RequestValidationPipe())
+  @UsePipes()
   findWeeklyEvents(
     @Query() queryParameters: GetEventsQueryParametersDto,
     @Request() req,
@@ -74,7 +70,7 @@ export class EventsController {
   }
   @Get('month')
   @UseGuards(JwtAuthGuard)
-  @UsePipes(new RequestValidationPipe())
+  @UsePipes()
   findMonthlyEvents(
     @Query() queryParameters: GetEventsQueryParametersDto,
     @Request() req,

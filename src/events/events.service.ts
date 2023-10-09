@@ -51,18 +51,14 @@ export class EventsService {
     console.log('Current date: ', currentDate);
 
     const startDate = new Date(currentDate);
-    startDate.setDate(currentDate.getDate() - currentDate.getDay());
+    startDate.setDate(currentDate.getDate() - (currentDate.getDay() - 1));
 
     const endDate = new Date(currentDate);
-    endDate.setDate(currentDate.getDate() + (6 - currentDate.getDay()));
+    endDate.setDate(currentDate.getDate() + (7 - currentDate.getDay()));
 
-    const userEvents = events.filter((event) => {
+    const weeklyEvents = events.filter((event) => {
       const eventDate = new Date(event.Date);
-      return (
-        eventDate >= startDate &&
-        eventDate <= endDate &&
-        event.UserID === user.sub
-      );
+      return endDate >= eventDate && event.UserID === user.sub;
     });
 
     const daysOfWeek = [];
@@ -71,28 +67,41 @@ export class EventsService {
       daysOfWeek.push(startDate.toISOString().split('T')[0]);
       startDate.setDate(startDate.getDate() + 1);
     }
-    console.log('hello');
+    console.log(weeklyEvents);
 
-    const allEventsOfWeek = [];
+    const allEventsOfMonth = [];
 
     for (const day of daysOfWeek) {
-      for (const event of userEvents) {
+      const currentWeekDay = new Date(day);
+      for (const event of weeklyEvents) {
+        const eventDate = new Date(event.Date);
         if (
           event.IsRecurring &&
           event.CategoryID === 'Daily' &&
-          new Date(day) >= new Date(event.Date)
+          currentWeekDay >= eventDate
         ) {
-          allEventsOfWeek.push({
+          allEventsOfMonth.push({
             ...event,
             Date: day,
           });
+        } else if (event.IsRecurring && event.CategoryID === 'Weekly') {
+          const extendedDate = new Date(eventDate);
+          extendedDate.setDate(eventDate.getDate() + 7);
+          console.log(currentWeekDay, '    ', extendedDate);
+          if (currentWeekDay.getDate() === extendedDate.getDate()) {
+            console.log('hello motto');
+            allEventsOfMonth.push({
+              ...event,
+              Date: day,
+            });
+          }
         } else if (event.Date === day) {
-          allEventsOfWeek.push(event);
+          allEventsOfMonth.push(event);
         }
       }
     }
 
-    return allEventsOfWeek;
+    return allEventsOfMonth;
   }
 
   findMonthlyEvents(date: string, user: any) {
@@ -100,13 +109,12 @@ export class EventsService {
     if (isNaN(currentDate.getTime())) return 'Invalid Date';
     console.log('Current date: ', currentDate);
 
-    const userEvents = events.filter((event) => {
+    const lastDateOfMonth = this.getEndOfMonth(currentDate);
+
+    const monthlyEvents = events.filter((event) => {
       const eventDate = new Date(event.Date);
-      const eventMonth = eventDate.getMonth() + 1;
-      const currentMonth = currentDate.getMonth() + 1;
-      return eventMonth === currentMonth && event.UserID === user.sub;
+      return lastDateOfMonth >= eventDate && event.UserID === user.sub;
     });
-    console.log(userEvents);
 
     const lastDayOfMonth = new Date(
       currentDate.getFullYear(),
@@ -119,22 +127,34 @@ export class EventsService {
       daysOfMonth.push(lastDayOfMonth.toISOString().split('T')[0]);
       lastDayOfMonth.setDate(lastDayOfMonth.getDate() - 1);
     }
-    console.log('hello');
 
     const allEventsOfMonth = [];
     console.log(daysOfMonth);
 
     for (const day of daysOfMonth) {
-      for (const event of userEvents) {
+      const currentWeekDay = new Date(day);
+      for (const event of monthlyEvents) {
+        const eventDate = new Date(event.Date);
         if (
           event.IsRecurring &&
           event.CategoryID === 'Daily' &&
-          new Date(day) >= new Date(event.Date)
+          currentWeekDay >= eventDate
         ) {
           allEventsOfMonth.push({
             ...event,
             Date: day,
           });
+        } else if (event.IsRecurring && event.CategoryID === 'Weekly') {
+          const extendedDate = new Date(eventDate);
+          extendedDate.setDate(eventDate.getDate() + 7);
+          console.log(currentWeekDay, '    ', extendedDate);
+          if (currentWeekDay.getDate() === extendedDate.getDate()) {
+            console.log('hello motto');
+            allEventsOfMonth.push({
+              ...event,
+              Date: day,
+            });
+          }
         } else if (event.Date === day) {
           allEventsOfMonth.push(event);
         }
@@ -142,5 +162,12 @@ export class EventsService {
     }
     console.log(allEventsOfMonth);
     return allEventsOfMonth;
+  }
+
+  getEndOfMonth(date: Date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const lastDay = new Date(year, month + 1, 0); // Setting day to 0 gives the last day of the previous month
+    return lastDay;
   }
 }

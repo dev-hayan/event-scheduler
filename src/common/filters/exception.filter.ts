@@ -25,10 +25,10 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       });
     } else {
       // Handle other types of exceptions if needed
-      console.log(exception);
+      console.log(exception.message);
       response.status(status).json({
         statusCode: status,
-        message: 'Internal server error', // or a custom message
+        message: exception.message, // or a custom message
       });
     }
   }
