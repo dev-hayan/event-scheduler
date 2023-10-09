@@ -109,18 +109,13 @@ export class EventsService {
     if (isNaN(currentDate.getTime())) return 'Invalid Date';
     console.log('Current date: ', currentDate);
 
-    const lastDateOfMonth = this.getEndOfMonth(currentDate);
+    const lastDayOfMonth = this.getEndOfMonth(currentDate);
 
     const monthlyEvents = events.filter((event) => {
       const eventDate = new Date(event.Date);
-      return lastDateOfMonth >= eventDate && event.UserID === user.sub;
+      return lastDayOfMonth >= eventDate && event.UserID === user.sub;
     });
 
-    const lastDayOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0,
-    );
     const daysOfMonth = [];
 
     for (let i = 0; i < lastDayOfMonth.getDate(); i++) {
